@@ -1,40 +1,46 @@
 import flet as ft
 from page_control import PageControl
-from menu import AppMenu
-from utils import get_device_ip  # Assuming get_device_ip is in a utils.py file
+from utils import get_device_ip
 
 def main(page: ft.Page):
-
-    page.window.width = 300
+    # Get the some_value (e.g., IP address) and pass it to the PageControl
+    some_value = "Your IP Address or some_value"
     page.window.always_on_top = True
-    # Initialize the PageControl
-    page_control = PageControl(page)
-    app_menu = AppMenu(on_route_change=page_control.change_page)
-    
-    # Add the menu to the page
-    page.add(app_menu.build())
-    page.add(page_control.build())
-
-    # Get the device's IP address
     ip_address = get_device_ip()
+    
     try:
-        # chek it a localhost
         page_url = str(page.url).split(':')[1]
         if page_url != '//localhost':
             # Handle link request
             route, *params = page.url.split("?")
-            page_control.change_page(route, *params)
+            controller.change_page(route, **ip_address)  # Pass the dictionary as keyword arguments
         else:
-            page_control.change_page("/page1", ip_address)
+            controller.change_page("/page1", **ip_address)  # Pass the dictionary as keyword arguments
     except Exception as e:
         print(e)
 
-    # # Check if the app was opened via a link
-    # if page.url != 'tcp://localhost:64771':
-    #     print(page.url)
-        
-    # else:
-    #     # Normal open, route to Page1 with device IP address
-    #     page_control.change_page("/page1", ip_address)
+    controller = PageControl(page, some_value="Some Value")
+    page.add(controller.build())
+    controller.change_page("/page1", **ip_address)  # Pass the dictionary as keyword arguments
+
+    # controller = PageControl(page, some_value)
+    # page.add(controller.build())
+    # # page_control = PageControl(page)
+
+    # # Route to the initial page
+    # # controller.change_page("/page1")
+    #  # Get the device's IP address
+    # ip_address = get_device_ip()
+    # try:
+    #     # chek it a localhost
+    #     page_url = str(page.url).split(':')[1]
+    #     if page_url != '//localhost':
+    #         # Handle link request
+    #         route, *params = page.url.split("?")
+    #         controller.change_page(route, *params)
+    #     else:
+    #         controller.change_page("/page1", **ip_address)
+    # except Exception as e:
+    #     print(e)
 
 ft.app(target=main)

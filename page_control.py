@@ -2,36 +2,40 @@ import flet as ft
 from page1 import Page1
 from page2 import Page2
 from page3 import Page3
+from menu import AppMenu
 
 class PageControl:
-    def __init__(self, page: ft.Page):
+    def __init__(self, page, some_value):
         self.page = page
+        self.some_value = some_value
         self.content_container = ft.Container(expand=True)
-        
+        self.app_menu = AppMenu(self.change_page).build()
+
         # Dictionary mapping routes to page classes
         self.pages = {
             "/page1": Page1,
             "/page2": Page2,
-            "/page3": Page3
+            "/page3": Page3,
         }
 
     def build(self):
-        return self.content_container
+        return ft.Column(
+            controls=[
+                self.app_menu,
+                self.content_container
+            ],
+            expand=True
+        )
 
-    def change_page(self, route, some_value="Default value"):
+    def change_page(self, route, **kwargs):
+        # Dynamically instantiate the page based on the route
         if route in self.pages:
             page_class = self.pages[route]
-            content = page_class(some_value).build()
+            # Pass the required 'page' argument along with additional kwargs
+            content = page_class(self.page, **kwargs).build()
+            self.content_container.content = content
+            self.page.update()
         else:
-            content = ft.Text("404 - Page not found.")
-
-        # Update the content of the container
-        self.content_container.content = content
-        self.page.update()
-
-    def handle_link(self, url: str):
-        route = url.split("?")[0]
-        params = url.split("?")[1:]  # Extract parameters if any
-
-        # Change page based on the extracted route
-        self.change_page(route, *params)
+            # Handle unknown routes
+            self.content_container.content = ft.Text(f"404 - Page '{route}' not found.")
+            self.page.update()
