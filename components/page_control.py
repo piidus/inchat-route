@@ -18,6 +18,9 @@ class PageControl:
             "/Conversion": Conversion,
         }
 
+        # Track the current page instance
+        self.current_page = None
+
     def build(self):
         return ft.Column(
             controls=[
@@ -28,13 +31,22 @@ class PageControl:
         )
 
     def change_page(self, route, **kwargs):
+        # Call will_unmount on the current page if it exists
+        if self.current_page and hasattr(self.current_page, 'will_unmount'):
+            self.current_page.will_unmount()
+
         # Dynamically instantiate the page based on the route
         if route in self.pages:
             page_class = self.pages[route]
             # Pass the required 'page' argument along with additional kwargs
-            content = page_class(self.page, **kwargs).build()
-            self.content_container.content = content
+            self.current_page = page_class(self.page, **kwargs)
+            
+            # Set content and call did_mount if it exists
+            self.content_container.content = self.current_page.build()
             self.page.update()
+            
+            if hasattr(self.current_page, 'did_mount'):
+                self.current_page.did_mount()
         else:
             # Handle unknown routes
             self.content_container.content = ft.Text(f"404 - Page '{route}' not found.")

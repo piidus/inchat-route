@@ -5,6 +5,7 @@ from components.utils import get_device_ip
 def main(page: ft.Page):
     # Get the some_value (e.g., IP address) and pass it to the PageControl
     some_value = "Your IP Address or some_value"
+    page.window.width = 200
     page.window.always_on_top = True
     ip_address = get_device_ip()
     controller = PageControl(page, some_value="Some Value")

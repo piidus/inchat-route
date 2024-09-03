@@ -1,5 +1,6 @@
 import flet as ft
 from components.utils import get_device_ip
+from components.connection import Connection
 class Message:
     '''message require self name and text and type'''
     def __init__(self, user_name: str, text: str, message_type: str):
@@ -74,8 +75,14 @@ class Conversion:
         self.chat = ft.ListView(expand=True, spacing=10, auto_scroll=True) #whole chat area as a list view
         self.dialog = None
         self.new_message = None
-        self.device_ip = get_device_ip()['ip_address']
-        # print(self.device_ip)
+        # self.device_ip = get_device_ip()['ip_address']
+        self.receiver = None
+    
+    def did_mount(self):
+        try:
+            self.connection = Connection()
+        except Exception as e:
+            print('[ERROR IM DID MOUNT CONNECTION]', e)
 
     def build(self):
         self.page.horizontal_alignment = ft.CrossAxisAlignment.STRETCH #stretch horizontally
@@ -121,19 +128,19 @@ class Conversion:
             None
         """
 
-        self.page.pubsub.subscribe(self.on_message) # subscribe to on_message event
+        # self.page.pubsub.subscribe(self.on_message) # subscribe to on_message event
 
         # A dialog asking for a user display name
-        join_user_name = ft.TextField(
-            label="Enter your name to join the chat",
+        join_friend_name = ft.TextField(
+            label="Enter your name of Friend",
             autofocus=True,
             on_submit=self.join_chat_click,
         )
         self.dialog = ft.AlertDialog(
             open=True,
             modal=True,
-            title=ft.Text("Welcome!"  + str(self.device_ip)),
-            content=ft.Column([join_user_name], width=300, height=70, tight=True),
+            title=ft.Text("Welcome!" ),
+            content=ft.Column([join_friend_name], width=300, height=70, tight=True),
             actions=[ft.ElevatedButton(text="Join chat", on_click=self.join_chat_click)],
             actions_alignment=ft.MainAxisAlignment.END,
         )
@@ -169,16 +176,16 @@ class Conversion:
             join_user_name.error_text = "Name cannot be blank!"
             join_user_name.update()
         else:
-            self.page.session.set("user_name", join_user_name.value)
+            self.page.session.set("receiver_name", join_user_name.value)
             self.dialog.open = False
-            self.new_message.prefix = ft.Text(f"{join_user_name.value}: ")
-            self.page.pubsub.send_all(
-                Message(
-                    user_name=join_user_name.value,
-                    text=f"{join_user_name.value} has joined the chat.",
-                    message_type="login_message",
-                )
-            )
+            self.new_message.prefix = ft.Text(f"You: ")
+            # self.page.pubsub.send_all(
+            #     Message(
+            #         user_name=join_user_name.value,
+            #         text=f"{join_user_name.value} has joined the chat.",
+            #         message_type="login_message",
+            #     )
+            # )
             self.page.update()
     
     def send_message_click(self, e):
@@ -194,13 +201,17 @@ class Conversion:
         """
 
         if self.new_message.value != "":
-            self.page.pubsub.send_all(
-                Message(
-                    self.page.session.get("user_name"),
-                    self.new_message.value,
-                    message_type="chat_message",
-                )
-            )
+            receiver = self.page.session.get("receiver_name")
+            msg = f"{'receiver'}: {"self.new_message.value"}"
+            self.connection.message_sent(receiver=receiver, message=self.new_message.value)
+            self.on_message(message=Message(user_name=self.page.session.get("You"), text=self.new_message.value, message_type="chat_message"))
+            # self.page.pubsub.send_all(
+            #     Message(
+            #         self.page.session.get("user_name"),
+            #         self.new_message.value,
+            #         message_type="chat_message",
+            #     )
+            # )
             self.new_message.value = ""
             self.new_message.focus()
             self.page.update()
@@ -224,4 +235,7 @@ class Conversion:
             m = ft.Text(message.text, italic=True, color=ft.colors.BLACK45, size=12)
         self.chat.controls.append(m)
         self.page.update()
+    @staticmethod
+    def income_message(message: Message):
+        print(f"[INCOME MESSAGE] {message}")
 
