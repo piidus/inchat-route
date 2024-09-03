@@ -16,7 +16,7 @@ def main(page: ft.Page):
             route, *params = page.url.split("?")
             controller.change_page(route, **ip_address)  # Pass the dictionary as keyword arguments
         else:
-            controller.change_page("/page1", **ip_address)  # Pass the dictionary as keyword arguments
+            controller.change_page("/Conversion", **ip_address)  # Pass the dictionary as keyword arguments
     except Exception as e:
         print(e)
 

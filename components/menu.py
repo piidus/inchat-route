@@ -10,13 +10,13 @@ class AppMenu:
                 [
                     ft.Icon(ft.icons.PALETTE, size=18),
                     ft.Text("App Example", size=18),
-                    ft.IconButton(ft.icons.WB_SUNNY_OUTLINED, on_click=self._dummy_action),
-                    ft.IconButton(ft.icons.FILTER_3, on_click=self._dummy_action),
+                    # ft.IconButton(ft.icons.WB_SUNNY_OUTLINED, on_click=self._dummy_action),
+                    # ft.IconButton(ft.icons.FILTER_3, on_click=self._dummy_action),
                     ft.PopupMenuButton(
                         items=[
                             ft.PopupMenuItem(text="Page 1", on_click=lambda _: self.on_route_change("/page1")),
                             ft.PopupMenuItem(text="Page 2", on_click=lambda _: self.on_route_change("/page2")),
-                            ft.PopupMenuItem(text="Page 3", on_click=lambda _: self.on_route_change("/page3")),
+                            ft.PopupMenuItem(text="Page 3", on_click=lambda _: self.on_route_change("/Conversion")),
                         ],
                     ),
                 ],

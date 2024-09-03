@@ -1,7 +1,7 @@
 import flet as ft
 from pages.login.page1 import Page1
 from pages.chat.page2 import Page2
-from pages.chat.page3 import Page3
+from pages.chat.conversion import Conversion
 from components.menu import AppMenu
 
 class PageControl:
@@ -15,7 +15,7 @@ class PageControl:
         self.pages = {
             "/page1": Page1,
             "/page2": Page2,
-            "/page3": Page3,
+            "/Conversion": Conversion,
         }
 
     def build(self):
