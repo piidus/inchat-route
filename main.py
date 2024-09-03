@@ -1,13 +1,14 @@
 import flet as ft
-from page_control import PageControl
-from utils import get_device_ip
+from components.page_control import PageControl
+from components.utils import get_device_ip
 
 def main(page: ft.Page):
     # Get the some_value (e.g., IP address) and pass it to the PageControl
     some_value = "Your IP Address or some_value"
     page.window.always_on_top = True
     ip_address = get_device_ip()
-    
+    controller = PageControl(page, some_value="Some Value")
+    page.add(controller.build())
     try:
         page_url = str(page.url).split(':')[1]
         if page_url != '//localhost':
@@ -19,9 +20,8 @@ def main(page: ft.Page):
     except Exception as e:
         print(e)
 
-    controller = PageControl(page, some_value="Some Value")
-    page.add(controller.build())
-    controller.change_page("/page1", **ip_address)  # Pass the dictionary as keyword arguments
+    
+    # controller.change_page("/page1", **ip_address)  # Pass the dictionary as keyword arguments
 
     # controller = PageControl(page, some_value)
     # page.add(controller.build())

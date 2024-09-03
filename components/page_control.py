@@ -1,8 +1,8 @@
 import flet as ft
-from page1 import Page1
-from page2 import Page2
-from page3 import Page3
-from menu import AppMenu
+from pages.login.page1 import Page1
+from pages.chat.page2 import Page2
+from pages.chat.page3 import Page3
+from components.menu import AppMenu
 
 class PageControl:
     def __init__(self, page, some_value):
