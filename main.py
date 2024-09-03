@@ -5,7 +5,7 @@ from components.utils import get_device_ip
 def main(page: ft.Page):
     # Get the some_value (e.g., IP address) and pass it to the PageControl
     some_value = "Your IP Address or some_value"
-    page.window.width = 200
+    page.window.width = 400
     page.window.always_on_top = True
     ip_address = get_device_ip()
     controller = PageControl(page, some_value="Some Value")
@@ -17,7 +17,7 @@ def main(page: ft.Page):
             route, *params = page.url.split("?")
             controller.change_page(route, **ip_address)  # Pass the dictionary as keyword arguments
         else:
-            controller.change_page("/Conversion", **ip_address)  # Pass the dictionary as keyword arguments
+            controller.change_page("/page1", **ip_address)  # Pass the dictionary as keyword arguments
     except Exception as e:
         print(e)
 

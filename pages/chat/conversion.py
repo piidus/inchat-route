@@ -1,6 +1,7 @@
 import flet as ft
 from components.utils import get_device_ip
 from components.connection import Connection
+import threading
 class Message:
     '''message require self name and text and type'''
     def __init__(self, user_name: str, text: str, message_type: str):
@@ -24,7 +25,7 @@ class ChatMessage(ft.Row):
             ),
             ft.Column(
                 [
-                    ft.Text(message.user_name, weight="bold"),
+                    ft.Text('You', weight="bold"),
                     ft.Text(message.text, selectable=True),
                 ],
                 tight=True,
@@ -62,10 +63,9 @@ class Conversion:
     __init__ and build function to create chat ui
     setup_chat_ui function to setup chat ui
     send_message_click function to send message
-    on_message function to handle incoming message
     get_device_ip function to get device ip
     join_chat_click function to join chat
-    leave_chat_click function to leave chat
+    
 
     '''
 
@@ -80,7 +80,10 @@ class Conversion:
     
     def did_mount(self):
         try:
-            self.connection = Connection()
+            self.connection = Connection(user=self.page.session.get('user_name'))
+            receive_thread = threading.Thread(target=self.receive_messages, args=(self.connection,))
+            receive_thread.start()
+            # self.connection.send('baba'.encode('utf-8'))
         except Exception as e:
             print('[ERROR IM DID MOUNT CONNECTION]', e)
 
@@ -178,14 +181,7 @@ class Conversion:
         else:
             self.page.session.set("receiver_name", join_user_name.value)
             self.dialog.open = False
-            self.new_message.prefix = ft.Text(f"You: ")
-            # self.page.pubsub.send_all(
-            #     Message(
-            #         user_name=join_user_name.value,
-            #         text=f"{join_user_name.value} has joined the chat.",
-            #         message_type="login_message",
-            #     )
-            # )
+            self.new_message.prefix = ft.Text(f"You :: ")
             self.page.update()
     
     def send_message_click(self, e):
@@ -202,9 +198,9 @@ class Conversion:
 
         if self.new_message.value != "":
             receiver = self.page.session.get("receiver_name")
-            msg = f"{'receiver'}: {"self.new_message.value"}"
+            
             self.connection.message_sent(receiver=receiver, message=self.new_message.value)
-            self.on_message(message=Message(user_name=self.page.session.get("You"), text=self.new_message.value, message_type="chat_message"))
+            self.on_message(message=Message(user_name=self.page.session.get("user_name"), text=self.new_message.value, message_type="chat_message"))
             # self.page.pubsub.send_all(
             #     Message(
             #         self.page.session.get("user_name"),
@@ -231,11 +227,19 @@ class Conversion:
 
         if message.message_type == "chat_message":
             m = ChatMessage(message)
+
         elif message.message_type == "login_message":
             m = ft.Text(message.text, italic=True, color=ft.colors.BLACK45, size=12)
         self.chat.controls.append(m)
         self.page.update()
-    @staticmethod
-    def income_message(message: Message):
-        print(f"[INCOME MESSAGE] {message}")
+    def receive_messages(self , client_socket):
+        while True:
+            try:
+                message = client_socket.receive()
+                usr, msg = message.split(": ")
+                self.on_message(message=Message(user_name=usr, text=msg, message_type="chat_message"))
+                print(f"[RECEIVED MESSAGE] {message}")
+            except Exception as e:
+                print(f"[ERROR] Receiving message failed: {e}")
+                break
 

@@ -2,12 +2,16 @@ import socket
 import threading
 
 class Connection:
-    ip = '192.168.0.100'# '103.172.92.27'
+    ip =  '103.172.92.27' #'192.168.0.100'
     port = 9998
-    def __init__(self, ip_addr = ip, port=port):
+    def __init__(self, user,ip_addr = ip, port=port):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.connect((ip_addr, port))
-    
+        self.user_name = user.encode('utf-8')
+        self.sock.send(self.user_name)
+        # receive_thread = threading.Thread(target=receive_messages, args=(self.sock,))
+        # receive_thread.start()
+   
 
     def message_sent(self,receiver, message):
         full_message = f"{receiver}: {message}"
@@ -15,6 +19,7 @@ class Connection:
         print('[SEND MESSAGE]', message)
     
     def receive(self):
+        print('received from server in coonnection')
         return self.sock.recv(1024).decode('utf-8')
 
 def receive_messages(client_socket):
