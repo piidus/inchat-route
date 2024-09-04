@@ -14,9 +14,9 @@ class ChatMessage(ft.Row):
     '''
     create chat message take raw message and design here!
     '''
-    def __init__(self, message: Message):
+    def __init__(self, message: Message, align: ft.CrossAxisAlignment.START):
         super().__init__()
-        self.vertical_alignment = ft.CrossAxisAlignment.START
+        self.vertical_alignment = align
         self.controls = [
             ft.CircleAvatar(
                 content=ft.Text(self.get_initials(message.user_name)),
@@ -25,7 +25,7 @@ class ChatMessage(ft.Row):
             ),
             ft.Column(
                 [
-                    ft.Text('You', weight="bold"),
+                    ft.Text(message.user_name, weight="bold"),
                     ft.Text(message.text, selectable=True),
                 ],
                 tight=True,
@@ -165,13 +165,7 @@ class Conversion:
     def join_chat_click(self, e):
         """
         Handles the click event of the "Join chat" button.
-
-        Parameters:
-            self: The instance of the class that this function is a part of.
-            e: The event object associated with the click event.
-
-        Returns:
-            None
+        set receiver name to session
         """
 
         join_user_name = self.dialog.content.controls[0]
@@ -201,13 +195,6 @@ class Conversion:
             
             self.connection.message_sent(receiver=receiver, message=self.new_message.value)
             self.on_message(message=Message(user_name=self.page.session.get("user_name"), text=self.new_message.value, message_type="chat_message"))
-            # self.page.pubsub.send_all(
-            #     Message(
-            #         self.page.session.get("user_name"),
-            #         self.new_message.value,
-            #         message_type="chat_message",
-            #     )
-            # )
             self.new_message.value = ""
             self.new_message.focus()
             self.page.update()
@@ -217,16 +204,13 @@ class Conversion:
         """
         Handles incoming messages and updates the chat UI accordingly.
 
-        Parameters:
-            self: The instance of the class that this function is a part of.
-            message (Message): The incoming message object containing the message type, user name, and text.
-
-        Returns:
-            None
         """
 
         if message.message_type == "chat_message":
-            m = ChatMessage(message)
+            m = ChatMessage(message, align=ft.MainAxisAlignment.START)
+
+        elif message.message_type == "receive_chat":
+            m = ChatMessage(message, align=ft.MainAxisAlignment.END)
 
         elif message.message_type == "login_message":
             m = ft.Text(message.text, italic=True, color=ft.colors.BLACK45, size=12)
@@ -237,7 +221,7 @@ class Conversion:
             try:
                 message = client_socket.receive()
                 usr, msg = message.split(": ")
-                self.on_message(message=Message(user_name=usr, text=msg, message_type="chat_message"))
+                self.on_message(message=Message(user_name=usr, text=msg, message_type="receive_chat"))
                 print(f"[RECEIVED MESSAGE] {message}")
             except Exception as e:
                 print(f"[ERROR] Receiving message failed: {e}")
