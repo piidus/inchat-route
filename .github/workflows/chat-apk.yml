@@ -70,7 +70,7 @@ jobs:
     - name: Build APK and AAB
       run: |
         echo "Starting APK and AAB build..."
-        flet build apk --build-version ${{ env.BUILD_VERSION }} --build-number ${{ env.BUILD_NUMBER }} --verbose > apk_build.log 2>&1
+        flet build apk --include-packages flet_permission_handler --build-version ${{ env.BUILD_VERSION }} --build-number ${{ env.BUILD_NUMBER }} --verbose > apk_build.log 2>&1
         if [ $? -ne 0 ]; then
           echo "Flet build apk failed. Check apk_build.log for details."
           exit 1
