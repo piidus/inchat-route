@@ -1,6 +1,7 @@
 import flet as ft
 import platform
 from models.model import first_time
+
 class Page1:
     def __init__(self, page, **kwargs):
         self.page = page
@@ -11,7 +12,6 @@ class Page1:
         self.error_message = ft.Text("", color=ft.colors.RED)  # Placeholder for error messages
 
     def did_mount(self):
-
         if platform.system() == 'Android':
             print("This is an Android device.")
             try:
@@ -25,28 +25,21 @@ class Page1:
                 if not storage_permission:
                     # Request storage permission if not already granted
                     self.permission_handler.request_permission(ft.PermissionType.STORAGE)
-            except Exception as e:
-                self.page.add(ft.Text(f"Error in storage permission: {e}"))
-                self.page.update()
-            try:
+                
                 microphone_permission = self.permission_handler.check_permission(ft.PermissionType.MICROPHONE)
 
                 if not microphone_permission:
                     # Request microphone permission if not already granted
                     self.permission_handler.request_permission(ft.PermissionType.MICROPHONE)
-            except Exception as e:
-                self.page.add(ft.Text(f"Error in microphone permission: {e}"))
-                self.page.update()
-            try:
-                #create storage
+
+                # Create storage
                 first_time()
+                
             except Exception as e:
-                self.page.add(ft.Text(f"Error in storage permission: {e}"))
+                self.page.add(ft.Text(f"Error in permission handling: {e}"))
                 self.page.update()
-        
         else:
             print("This is not an Android device.")
-        # Add PermissionHandler to the page's overlay
         
     def join_chat_click(self, e):
         user_name = self.name_field.value
@@ -56,7 +49,7 @@ class Page1:
             return
 
         self.page.session.set("user_name", user_name)
-        self.error_message.value = "Username set to: " + user_name    # Clear any previous error message
+        self.error_message.value = "Username set to: " + user_name  # Clear any previous error message
         self.page.update()
         print(f"Username set to: {user_name}")
 
@@ -86,14 +79,28 @@ class Page1:
         )
 
     def check_microphone_permission(self, e):
+        # Ensure PermissionHandler is in overlay before checking permission
+        if self.permission_handler not in self.page.overlay:
+            self.page.overlay.append(self.permission_handler)
+            self.page.update()
+        
         permission_status = self.permission_handler.check_permission(e.control.data)
         self.page.add(ft.Text(f"Checked {e.control.data.name}: {permission_status}"))
 
     def request_microphone_permission(self, e):
+        # Ensure PermissionHandler is in overlay before requesting permission
+        if self.permission_handler not in self.page.overlay:
+            self.page.overlay.append(self.permission_handler)
+            self.page.update()
+        
         permission_status = self.permission_handler.request_permission(e.control.data)
         self.page.add(ft.Text(f"Requested {e.control.data.name}: {permission_status}"))
 
     def open_app_settings(self, e):
+        # Ensure PermissionHandler is in overlay before opening app settings
+        if self.permission_handler not in self.page.overlay:
+            self.page.overlay.append(self.permission_handler)
+            self.page.update()
+        
         app_settings_status = self.permission_handler.open_app_settings()
         self.page.add(ft.Text(f"App Settings: {app_settings_status}"))
-
