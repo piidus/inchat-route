@@ -14,6 +14,7 @@ class Page1:
 
         if platform.system() == 'Android':
             print("This is an Android device.")
+            first_time()
             self.page.overlay.append(self.permission_handler)
             self.page.update()  # Ensure the page is updated after adding the handler
 
