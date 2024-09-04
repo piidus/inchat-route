@@ -14,24 +14,46 @@ class ChatMessage(ft.Row):
     '''
     create chat message take raw message and design here!
     '''
-    def __init__(self, message: Message, align: ft.CrossAxisAlignment.START):
+    def __init__(self, message: Message, type = 'outgoing'):
         super().__init__()
-        self.vertical_alignment = align
-        self.controls = [
-            ft.CircleAvatar(
+        avatar = ft.CircleAvatar(
                 content=ft.Text(self.get_initials(message.user_name)),
                 color=ft.colors.WHITE,
                 bgcolor=self.get_avatar_color(message.user_name),
-            ),
-            ft.Column(
+            )
+        content = ft.Column(
                 [
                     ft.Text(message.user_name, weight="bold"),
                     ft.Text(message.text, selectable=True),
                 ],
                 tight=True,
                 spacing=5,
-            ),
-        ]
+            )
+        
+        if type == 'outgoing':
+            self.alignment = align=ft.MainAxisAlignment.END
+            self.controls = [content, avatar]
+        else:
+            self.alignment = ft.MainAxisAlignment.START
+            self.controls = [avatar, content]
+        
+        
+        # self.controls = [
+        #     ft.CircleAvatar(
+        #         content=ft.Text(self.get_initials(message.user_name)),
+        #         color=ft.colors.WHITE,
+        #         bgcolor=self.get_avatar_color(message.user_name),
+        #     ),
+        #     ft.Column(
+        #         [
+        #             ft.Text(message.user_name, weight="bold"),
+        #             ft.Text(message.text, selectable=True),
+        #         ],
+        #         tight=True,
+        #         spacing=5,
+        #     )
+            
+        # ]
 
     def get_initials(self, user_name: str):
         if user_name:
@@ -72,7 +94,7 @@ class Conversion:
     def __init__(self, page: ft.Page, **kwargs):
         self.page = page
         self.some_value = kwargs.get('some_value', 'Default Value')
-        self.chat = ft.ListView(expand=True, spacing=10, auto_scroll=True) #whole chat area as a list view
+        self.chat = ft.ListView(expand=True, spacing=10, auto_scroll=True, reverse=True) #whole chat area as a list view
         self.dialog = None
         self.new_message = None
         # self.device_ip = get_device_ip()['ip_address']
@@ -207,14 +229,14 @@ class Conversion:
         """
 
         if message.message_type == "chat_message":
-            m = ChatMessage(message, align=ft.MainAxisAlignment.START)
+            m = ChatMessage(message, type='outgoing')
 
         elif message.message_type == "receive_chat":
-            m = ChatMessage(message, align=ft.MainAxisAlignment.END)
+            m = ChatMessage(message, type='incoming')
 
         elif message.message_type == "login_message":
             m = ft.Text(message.text, italic=True, color=ft.colors.BLACK45, size=12)
-        self.chat.controls.append(m)
+        self.chat.controls.insert(0, m)
         self.page.update()
     def receive_messages(self , client_socket):
         while True:
