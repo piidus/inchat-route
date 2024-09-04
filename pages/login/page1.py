@@ -14,16 +14,35 @@ class Page1:
 
         if platform.system() == 'Android':
             print("This is an Android device.")
-            first_time()
-            self.page.overlay.append(self.permission_handler)
-            self.page.update()  # Ensure the page is updated after adding the handler
+            try:
+                # Add PermissionHandler to the page's overlay
+                self.page.overlay.append(self.permission_handler)
+                self.page.update()  # Ensure the page is updated after adding the handler
 
-            # Check if the required permissions are granted
-            storage_permission = self.permission_handler.check_permission(ft.PermissionType.STORAGE)
-            
-            if not storage_permission:
-                # Request storage permission if not already granted
-                self.permission_handler.request_permission(ft.PermissionType.STORAGE)
+                # Check if the required permissions are granted
+                storage_permission = self.permission_handler.check_permission(ft.PermissionType.STORAGE)
+                
+                if not storage_permission:
+                    # Request storage permission if not already granted
+                    self.permission_handler.request_permission(ft.PermissionType.STORAGE)
+            except Exception as e:
+                self.page.add(ft.Text(f"Error in storage permission: {e}"))
+                self.page.update()
+            try:
+                microphone_permission = self.permission_handler.check_permission(ft.PermissionType.MICROPHONE)
+
+                if not microphone_permission:
+                    # Request microphone permission if not already granted
+                    self.permission_handler.request_permission(ft.PermissionType.MICROPHONE)
+            except Exception as e:
+                self.page.add(ft.Text(f"Error in microphone permission: {e}"))
+                self.page.update()
+            try:
+                #create storage
+                first_time()
+            except Exception as e:
+                self.page.add(ft.Text(f"Error in storage permission: {e}"))
+                self.page.update()
         
         else:
             print("This is not an Android device.")
@@ -37,7 +56,7 @@ class Page1:
             return
 
         self.page.session.set("user_name", user_name)
-        self.error_message.value = ""  # Clear any previous error message
+        self.error_message.value = "Username set to: " + user_name    # Clear any previous error message
         self.page.update()
         print(f"Username set to: {user_name}")
 
